@@ -1,0 +1,10 @@
+# Node modules
+# Ignore build folders
+.next/
+dist/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore env files
+.env
