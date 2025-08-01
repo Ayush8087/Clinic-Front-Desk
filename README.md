@@ -2,6 +2,8 @@
 
 A simple, web-based application built to manage patient queues and doctor appointments at a clinic, allowing front desk staff to efficiently handle daily operations.
 
+![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/assign%20queue.png?raw=true)
+
 ## Overview
 
 This project is a full-stack application designed for a clinic's front desk. It provides a secure, intuitive dashboard for staff to manage walk-in patient queues, schedule appointments with doctors, and maintain up-to-date records of doctor profiles and their availability. The system is built with a modern technology stack, featuring a NestJS backend and a Next.js frontend.
@@ -94,3 +96,75 @@ The frontend application will be available at `http://localhost:3000`.
     - **Username:** `frontdesk`
     - **Password:** `password`
 4.  You will be redirected to the main dashboard where you can manage the clinic's operations.
+
+
+
+# 📋 Front Desk System at a Clinic - Task List with Images
+
+## 🔐 Authentication
+- [ ] Implement login functionality for front desk staff  
+  ![image alt](
+
+## 🧑‍⚕️ Doctor Management
+- [ ] Add doctor profiles  
+  ![image alt](
+
+- [ ] Edit doctor profiles  
+  ![image alt](
+
+- [ ] Delete doctor profiles  
+  ![image alt](
+
+- [ ] Search doctors by specialization  
+ ![image alt](
+
+- [ ] Filter doctors by location and availability  
+  ![image alt](
+
+## 📅 Appointment Management
+- [ ] View all appointments  
+ ![image alt](
+
+- [ ] Book appointments  
+ ![image alt](
+
+- [ ] Reschedule appointments  
+ ![image alt](
+
+- [ ] Cancel appointments  
+  ![image alt](
+
+- [ ] Update appointment status (booked, completed, canceled)  
+ ![image alt](
+
+## 🪪 Queue Management
+- [ ] Add walk-in patients to queue  
+![image alt](
+
+- [ ] Assign queue numbers  
+![image alt](
+
+- [ ] Update patient queue status (Waiting, With Doctor, Completed)  
+![image alt](
+
+- [ ] View and manage queue  
+ ![image alt](
+
+## 💻 Frontend Pages
+- [ ] Build Front Desk Page  
+ ![image alt](
+
+- [ ] Build Queue Management Page  
+![image alt](
+
+- [ ] Build Appointment Management View  
+ ![image alt](
+
+## 🌟 Bonus Features (Optional)
+- [ ] Deploy the application  
+![image alt](
+
+- [ ] Prioritize urgent patients in queue  
+ ![image alt](
+![image alt](
+
