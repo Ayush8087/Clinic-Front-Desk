@@ -94,4 +94,3 @@ The frontend application will be available at `http://localhost:3000`.
     - **Username:** `frontdesk`
     - **Password:** `password`
 4.  You will be redirected to the main dashboard where you can manage the clinic's operations.
-````
