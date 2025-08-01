@@ -103,68 +103,67 @@ The frontend application will be available at `http://localhost:3000`.
 
 ## 🔐 Authentication
 - [ ] Implement login functionality for front desk staff  
-  ![image alt](
+  ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/login.png?raw=true)
 
 ## 🧑‍⚕️ Doctor Management
 - [ ] Add doctor profiles  
-  ![image alt](
+  ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/add%20doc.png?raw=true)
 
 - [ ] Edit doctor profiles  
-  ![image alt](
+  ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/add%20doc.png?raw=true)
+
 
 - [ ] Delete doctor profiles  
-  ![image alt](
+ 
 
-- [ ] Search doctors by specialization  
- ![image alt](
+- [ ] Search doctors by specialization or name
+ ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/search%20doc.png?raw=true)
 
-- [ ] Filter doctors by location and availability  
-  ![image alt](
+- [ ] Filter doctors by location and availability
+
+- [ ] Add doctor
+      ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/add%20doc.png?raw=true)
 
 ## 📅 Appointment Management
 - [ ] View all appointments  
- ![image alt](
+ ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/manage%20appoint.png?raw=true)
 
 - [ ] Book appointments  
- ![image alt](
+ ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/book%20appoint.png?raw=true)
 
 - [ ] Reschedule appointments  
- ![image alt](
+ ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/reschedule%20appoint.png?raw=true)
 
 - [ ] Cancel appointments  
-  ![image alt](
+  ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/manage%20appoint.png?raw=true)
 
 - [ ] Update appointment status (booked, completed, canceled)  
- ![image alt](
 
 ## 🪪 Queue Management
 - [ ] Add walk-in patients to queue  
-![image alt](
+![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/add%20patient.png?raw=true)
 
 - [ ] Assign queue numbers  
-![image alt](
+
 
 - [ ] Update patient queue status (Waiting, With Doctor, Completed)  
-![image alt](
+![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/update%20patient.png?raw=true)
 
 - [ ] View and manage queue  
- ![image alt](
+
 
 ## 💻 Frontend Pages
 - [ ] Build Front Desk Page  
- ![image alt](
 
 - [ ] Build Queue Management Page  
-![image alt](
+    
 
 - [ ] Build Appointment Management View  
- ![image alt](
+
 
 ## 🌟 Bonus Features (Optional)
-- [ ] Deploy the application  
-![image alt](
 
 - [ ] Prioritize urgent patients in queue  
- ![image alt](
-![image alt](
+ ![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/urgent1.png?raw=true)
+![image alt](https://github.com/Ayush8087/Clinic-Front-Desk/blob/main/urgent2.png?raw=true)
 
