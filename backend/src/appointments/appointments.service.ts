@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Appointment } from './appointment.entity';
+import { Appointment, AppointmentStatus } from './appointment.entity';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Doctor } from '../doctors/doctor.entity';
-import { AppointmentStatus } from './appointment.entity';
 
 @Injectable()
 export class AppointmentsService {
@@ -14,8 +14,6 @@ export class AppointmentsService {
         @InjectRepository(Doctor)
         private doctorsRepository: Repository<Doctor>,
     ) {}
-
-    
 
     findAll(): Promise<Appointment[]> {
         return this.appointmentsRepository.find({ relations: ['doctor'] });
@@ -34,6 +32,22 @@ export class AppointmentsService {
         });
 
         return this.appointmentsRepository.save(newAppointment);
+    }
+
+    async update(id: number, updateDto: UpdateAppointmentDto): Promise<Appointment> {
+        const appointment = await this.appointmentsRepository.findOneBy({ id });
+        if (!appointment) {
+            throw new NotFoundException(`Appointment with ID "${id}" not found`);
+        }
+        
+        if (updateDto.appointmentTime) {
+            appointment.appointmentTime = new Date(updateDto.appointmentTime);
+        }
+        if (updateDto.status) {
+            appointment.status = updateDto.status;
+        }
+
+        return this.appointmentsRepository.save(appointment);
     }
 
     async cancel(id: number): Promise<Appointment> {
