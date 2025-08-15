@@ -16,10 +16,7 @@ export class QueueController {
         return this.queueService.getQueueStats();
     }
 
-    @Get('workload')
-    getDoctorWorkload() {
-        return this.queueService.getQueueStats();
-    }
+
 
     @Post()
     addToQueue(@Body() body: { patientName: string; priority?: PatientPriority; doctorId?: number }) {
@@ -50,5 +47,10 @@ export class QueueController {
         @Body('doctorId') doctorId: number | null,
     ) {
         return this.queueService.changeDoctor(+id, doctorId);
+    }
+
+    @Get('doctor/:id/workload')
+    getDoctorWorkload(@Param('id') id: string) {
+        return this.queueService.getDoctorWorkload(+id);
     }
 }

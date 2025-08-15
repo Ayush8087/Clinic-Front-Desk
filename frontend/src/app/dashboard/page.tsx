@@ -33,7 +33,11 @@ export default function DashboardPage() {
     // --- Data Fetching ---
     const fetchDoctors = async () => {
         try {
-            const response = await api.get('/doctors', { params: { search: doctorSearchTerm } });
+            const response = await api.get('/doctors', { 
+                params: { 
+                    search: doctorSearchTerm
+                } 
+            });
             setDoctors(response.data);
         } catch (error) { console.error('Failed to fetch doctors:', error); }
     };
@@ -115,7 +119,10 @@ export default function DashboardPage() {
     };
     const openEditModal = (doctor: Doctor) => { setDoctorToEdit(doctor); setIsEditDoctorModalOpen(true); };
     const openRescheduleModal = (appointment: Appointment) => { setAppointmentToReschedule(appointment); setIsRescheduleModalOpen(true); };
-    const handleLogout = () => { localStorage.removeItem('token'); router.push('/'); };
+    const handleLogout = () => { 
+        localStorage.removeItem('token'); 
+        router.push('/'); 
+    };
 
     if (isLoading) { return <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center">Loading...</div>; }
 
@@ -139,11 +146,9 @@ export default function DashboardPage() {
                     <div className="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold">Patient Queue</h2>
-                            <div className="flex gap-2">
-                                <button onClick={() => setIsPatientModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-                                    + Add Patient
-                                </button>
-                            </div>
+                            <button onClick={() => setIsPatientModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                                + Add Patient
+                            </button>
                         </div>
                         <div className="space-y-4">
                             {queue.map((entry, index) => (
@@ -239,7 +244,6 @@ export default function DashboardPage() {
                                             <button onClick={() => openEditModal(doctor)} className="text-xs text-cyan-400 hover:underline">Edit</button>
                                             <button onClick={() => handleDeleteDoctor(doctor.id)} className="text-xs text-red-400 hover:underline">Delete</button>
                                         </div>
-
                                     </div>
                                 ))}
                                 {doctors.length === 0 && <p className="text-gray-500 text-center py-4">No doctors found.</p>}

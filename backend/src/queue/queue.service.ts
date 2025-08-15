@@ -87,9 +87,31 @@ export class QueueService {
 
     private async handlePatientCompletion(completedEntry: QueueEntry): Promise<void> {
         if (completedEntry.doctorId) {
-            // Just remove the doctor assignment from the completed patient
-            // No automatic promotion - let users manually manage doctor assignments
+            const doctorId = completedEntry.doctorId;
+            
+            // Remove the doctor assignment from the completed patient
             await this.queueRepository.update(completedEntry.id, { doctorId: null });
+            
+            // Automatically promote the next patient assigned to the same doctor
+            await this.promoteNextPatientForSameDoctor(doctorId);
+        }
+    }
+
+    private async promoteNextPatientForSameDoctor(doctorId: number): Promise<void> {
+        // Find the next patient assigned to the same doctor who is currently waiting
+        const nextPatient = await this.queueRepository
+            .createQueryBuilder('queueEntry')
+            .where('queueEntry.doctorId = :doctorId', { doctorId })
+            .andWhere('queueEntry.status = :status', { status: QueueStatus.WAITING })
+            .orderBy('queueEntry.priority', 'DESC')
+            .addOrderBy('queueEntry.arrivalTime', 'ASC')
+            .getOne();
+
+        if (nextPatient) {
+            // Automatically promote this patient to "With Doctor" status
+            await this.queueRepository.update(nextPatient.id, {
+                status: QueueStatus.WITH_DOCTOR
+            });
         }
     }
 
@@ -155,6 +177,12 @@ export class QueueService {
             throw new NotFoundException(`Queue entry with ID "${id}" not found`);
         }
 
+        // If the patient was with a doctor, automatically promote the next patient
+        if (entry.doctorId && entry.status === QueueStatus.WITH_DOCTOR) {
+            const doctorId = entry.doctorId;
+            await this.promoteNextPatientForSameDoctor(doctorId);
+        }
+
         // Remove the entry from the queue
         await this.queueRepository.remove(entry);
     }
@@ -182,5 +210,33 @@ export class QueueService {
             throw new NotFoundException(`Queue entry with ID "${id}" not found`);
         }
         return updatedEntry;
+    }
+
+    // Method to get doctor's current workload
+    async getDoctorWorkload(doctorId: number): Promise<{
+        treating: number;
+        waiting: number;
+        total: number;
+    }> {
+        const [treating, waiting] = await Promise.all([
+            this.queueRepository.count({
+                where: {
+                    doctorId: doctorId,
+                    status: QueueStatus.WITH_DOCTOR
+                }
+            }),
+            this.queueRepository.count({
+                where: {
+                    doctorId: doctorId,
+                    status: QueueStatus.WAITING
+                }
+            })
+        ]);
+
+        return {
+            treating,
+            waiting,
+            total: treating + waiting
+        };
     }
 }
