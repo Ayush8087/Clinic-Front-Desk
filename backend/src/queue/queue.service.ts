@@ -2,12 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { QueueEntry, QueueStatus, PatientPriority } from './queue.entity';
+import { Doctor } from '../doctors/doctor.entity';
 
 @Injectable()
 export class QueueService {
     constructor(
         @InjectRepository(QueueEntry)
         private queueRepository: Repository<QueueEntry>,
+        @InjectRepository(Doctor)
+        private doctorsRepository: Repository<Doctor>,
     ) {}
 
     private async getNextQueueNumber(): Promise<number> {
@@ -26,10 +29,18 @@ export class QueueService {
             priority,
             doctorId: doctorId || null,
         });
-        return this.queueRepository.save(newEntry);
+        
+        const savedEntry = await this.queueRepository.save(newEntry);
+        
+        // If no specific doctor was assigned, try to auto-assign one
+        if (!doctorId) {
+            await this.autoAssignDoctor(savedEntry.id);
+        }
+        
+        return savedEntry;
     }
 
-    findAll(): Promise<QueueEntry[]> {
+    async findAll(): Promise<QueueEntry[]> {
         return this.queueRepository
             .createQueryBuilder('queueEntry')
             .leftJoinAndSelect('queueEntry.doctor', 'doctor')
@@ -40,12 +51,29 @@ export class QueueService {
     }
 
     async updateStatus(id: number, status: QueueStatus): Promise<QueueEntry> {
-        await this.queueRepository.update(id, { status });
         const entry = await this.queueRepository.findOneBy({ id });
         if (!entry) {
             throw new NotFoundException(`Queue entry with ID "${id}" not found`);
         }
-        return entry;
+
+        // Update the status
+        await this.queueRepository.update(id, { status });
+        
+        // If status is being set to "Completed", free up the doctor and assign next patient
+        if (status === QueueStatus.COMPLETED) {
+            await this.handlePatientCompletion(entry);
+        }
+        
+        // If status is being set to "With Doctor", ensure doctor is assigned
+        if (status === QueueStatus.WITH_DOCTOR && !entry.doctorId) {
+            await this.autoAssignDoctor(id);
+        }
+
+        const updatedEntry = await this.queueRepository.findOneBy({ id });
+        if (!updatedEntry) {
+            throw new NotFoundException(`Queue entry with ID "${id}" not found`);
+        }
+        return updatedEntry;
     }
     
     async prioritize(id: number): Promise<QueueEntry> {
@@ -55,5 +83,104 @@ export class QueueService {
         }
         entry.priority = PatientPriority.URGENT;
         return this.queueRepository.save(entry);
+    }
+
+    private async handlePatientCompletion(completedEntry: QueueEntry): Promise<void> {
+        if (completedEntry.doctorId) {
+            // Just remove the doctor assignment from the completed patient
+            // No automatic promotion - let users manually manage doctor assignments
+            await this.queueRepository.update(completedEntry.id, { doctorId: null });
+        }
+    }
+
+    private async assignNextPatientToDoctor(doctorId: number): Promise<void> {
+        // Find the next waiting patient (prioritizing urgent patients)
+        const nextPatient = await this.queueRepository
+            .createQueryBuilder('queueEntry')
+            .where('queueEntry.status = :status', { status: QueueStatus.WAITING })
+            .andWhere('queueEntry.doctorId IS NULL')
+            .orderBy('queueEntry.priority', 'DESC')
+            .addOrderBy('queueEntry.arrivalTime', 'ASC')
+            .getOne();
+
+        if (nextPatient) {
+            // Assign the doctor to this patient and update status
+            await this.queueRepository.update(nextPatient.id, {
+                doctorId: doctorId,
+                status: QueueStatus.WITH_DOCTOR
+            });
+        }
+    }
+
+    private async autoAssignDoctor(patientId: number): Promise<void> {
+        // Find an available doctor (not currently assigned to any active patient)
+        const availableDoctor = await this.doctorsRepository
+            .createQueryBuilder('doctor')
+            .leftJoin('queue', 'queue', 'queue.doctorId = doctor.id AND queue.status IN (:...activeStatuses)', {
+                activeStatuses: [QueueStatus.WAITING, QueueStatus.WITH_DOCTOR]
+            })
+            .where('queue.id IS NULL')
+            .getOne();
+
+        if (availableDoctor) {
+            // Assign the doctor to this patient
+            await this.queueRepository.update(patientId, {
+                doctorId: availableDoctor.id,
+                status: QueueStatus.WITH_DOCTOR
+            });
+        }
+    }
+
+
+
+    async getQueueStats(): Promise<{
+        waiting: number;
+        withDoctor: number;
+        completed: number;
+        total: number;
+    }> {
+        const [waiting, withDoctor, completed, total] = await Promise.all([
+            this.queueRepository.count({ where: { status: QueueStatus.WAITING } }),
+            this.queueRepository.count({ where: { status: QueueStatus.WITH_DOCTOR } }),
+            this.queueRepository.count({ where: { status: QueueStatus.COMPLETED } }),
+            this.queueRepository.count()
+        ]);
+
+        return { waiting, withDoctor, completed, total };
+    }
+
+    async removeFromQueue(id: number): Promise<void> {
+        const entry = await this.queueRepository.findOneBy({ id });
+        if (!entry) {
+            throw new NotFoundException(`Queue entry with ID "${id}" not found`);
+        }
+
+        // Remove the entry from the queue
+        await this.queueRepository.remove(entry);
+    }
+
+    async changeDoctor(id: number, doctorId: number | null): Promise<QueueEntry> {
+        const entry = await this.queueRepository.findOneBy({ id });
+        if (!entry) {
+            throw new NotFoundException(`Queue entry with ID "${id}" not found`);
+        }
+
+        // If assigning a new doctor, verify the doctor exists
+        if (doctorId) {
+            const doctor = await this.doctorsRepository.findOneBy({ id: doctorId });
+            if (!doctor) {
+                throw new NotFoundException(`Doctor with ID "${doctorId}" not found`);
+            }
+        }
+
+        // Update the doctor assignment
+        await this.queueRepository.update(id, { doctorId });
+
+        // Return the updated entry
+        const updatedEntry = await this.queueRepository.findOneBy({ id });
+        if (!updatedEntry) {
+            throw new NotFoundException(`Queue entry with ID "${id}" not found`);
+        }
+        return updatedEntry;
     }
 }

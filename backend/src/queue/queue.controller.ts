@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param } from '@nestjs/common';
 import { QueueService } from './queue.service';
 import { QueueStatus, PatientPriority } from './queue.entity';
 
@@ -9,6 +9,16 @@ export class QueueController {
     @Get()
     findAll() {
         return this.queueService.findAll();
+    }
+
+    @Get('stats')
+    getStats() {
+        return this.queueService.getQueueStats();
+    }
+
+    @Get('workload')
+    getDoctorWorkload() {
+        return this.queueService.getQueueStats();
     }
 
     @Post()
@@ -27,5 +37,18 @@ export class QueueController {
     @Patch(':id/prioritize')
     prioritize(@Param('id') id: string) {
         return this.queueService.prioritize(+id);
+    }
+
+    @Delete(':id')
+    removeFromQueue(@Param('id') id: string) {
+        return this.queueService.removeFromQueue(+id);
+    }
+
+    @Patch(':id/doctor')
+    changeDoctor(
+        @Param('id') id: string,
+        @Body('doctorId') doctorId: number | null,
+    ) {
+        return this.queueService.changeDoctor(+id, doctorId);
     }
 }

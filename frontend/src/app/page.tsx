@@ -19,7 +19,7 @@ export default function LoginPage() {
                 localStorage.setItem('token', token);
                 router.push('/dashboard');
             }
-        } catch (err) { setError('Invalid username or password.'); console.error('Login failed:', err); }
+        } catch (err) { setError('Invalid username or password.'); }
     };
 
     return (

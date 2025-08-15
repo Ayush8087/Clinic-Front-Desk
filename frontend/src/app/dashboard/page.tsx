@@ -76,6 +76,28 @@ export default function DashboardPage() {
             fetchData();
         } catch (error) { alert('Could not prioritize patient.'); }
     };
+    const handleDeleteFromQueue = async (id: number) => {
+        if (confirm('Are you sure you want to remove this patient from the queue?')) {
+            try {
+                await api.delete(`/queue/${id}`);
+                fetchData();
+            } catch (error) { alert('Could not remove patient from queue.'); }
+        }
+    };
+    const handleDeleteAppointment = async (id: number) => {
+        if (confirm('Are you sure you want to delete this appointment?')) {
+            try {
+                await api.delete(`/appointments/${id}`);
+                fetchData();
+            } catch (error) { alert('Could not delete appointment.'); }
+        }
+    };
+    const handleChangeDoctor = async (patientId: number, newDoctorId: number | null) => {
+        try {
+            await api.patch(`/queue/${patientId}/doctor`, { doctorId: newDoctorId });
+            fetchData();
+        } catch (error) { alert('Could not change doctor assignment.'); }
+    };
     const handleUpdateAppointmentStatus = async (id: number, status: string) => {
         if (status === 'Canceled' && !confirm('Are you sure you want to cancel?')) return;
         try {
@@ -117,9 +139,11 @@ export default function DashboardPage() {
                     <div className="lg:col-span-2 bg-gray-800 p-6 rounded-xl shadow-lg">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold">Patient Queue</h2>
-                            <button onClick={() => setIsPatientModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-                                + Add Patient
-                            </button>
+                            <div className="flex gap-2">
+                                <button onClick={() => setIsPatientModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                                    + Add Patient
+                                </button>
+                            </div>
                         </div>
                         <div className="space-y-4">
                             {queue.map((entry, index) => (
@@ -132,7 +156,11 @@ export default function DashboardPage() {
                                         )}
                                         <div>
                                             <p className="font-bold text-lg">{entry.patientName}</p>
-                                            {entry.doctor && <p className="text-xs text-cyan-400">w/ Dr. {entry.doctor.name}</p>}
+                                            {entry.doctor && (
+                                                <p className="text-xs text-cyan-400">
+                                                    w/ Dr. {entry.doctor.name}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-4">
@@ -150,6 +178,24 @@ export default function DashboardPage() {
                                             <option>With Doctor</option>
                                             <option>Completed</option>
                                         </select>
+                                        <select
+                                            value={entry.doctor?.id || ''}
+                                            onChange={(e) => handleChangeDoctor(entry.id, e.target.value ? parseInt(e.target.value) : null)}
+                                            className="bg-gray-600 text-white text-sm rounded-lg p-2"
+                                        >
+                                            <option value="">No Doctor</option>
+                                            {doctors.map((doctor) => (
+                                                <option key={doctor.id} value={doctor.id}>
+                                                    Dr. {doctor.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <button 
+                                            onClick={() => handleDeleteFromQueue(entry.id)} 
+                                            className="text-xs bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-3 rounded-lg"
+                                        >
+                                            Remove
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -193,6 +239,7 @@ export default function DashboardPage() {
                                             <button onClick={() => openEditModal(doctor)} className="text-xs text-cyan-400 hover:underline">Edit</button>
                                             <button onClick={() => handleDeleteDoctor(doctor.id)} className="text-xs text-red-400 hover:underline">Delete</button>
                                         </div>
+
                                     </div>
                                 ))}
                                 {doctors.length === 0 && <p className="text-gray-500 text-center py-4">No doctors found.</p>}
@@ -215,13 +262,16 @@ export default function DashboardPage() {
                                             </div>
                                             <p className="font-semibold text-sm">{appt.status}</p>
                                         </div>
-                                        {appt.status === 'Booked' && (
-                                            <div className="flex gap-4 mt-2 border-t border-gray-600 pt-2 text-xs">
-                                                <button onClick={() => handleUpdateAppointmentStatus(appt.id, 'Completed')} className="text-green-400 hover:underline">Complete</button>
-                                                <button onClick={() => openRescheduleModal(appt)} className="text-cyan-400 hover:underline">Reschedule</button>
-                                                <button onClick={() => handleUpdateAppointmentStatus(appt.id, 'Canceled')} className="text-red-400 hover:underline">Cancel</button>
-                                            </div>
-                                        )}
+                                        <div className="flex gap-4 mt-2 border-t border-gray-600 pt-2 text-xs">
+                                            {appt.status === 'Booked' && (
+                                                <>
+                                                    <button onClick={() => handleUpdateAppointmentStatus(appt.id, 'Completed')} className="text-green-400 hover:underline">Complete</button>
+                                                    <button onClick={() => openRescheduleModal(appt)} className="text-cyan-400 hover:underline">Reschedule</button>
+                                                    <button onClick={() => handleUpdateAppointmentStatus(appt.id, 'Canceled')} className="text-red-400 hover:underline">Cancel</button>
+                                                </>
+                                            )}
+                                            <button onClick={() => handleDeleteAppointment(appt.id)} className="text-red-400 hover:underline">Delete</button>
+                                        </div>
                                     </div>
                                 ))}
                                 {appointments.length === 0 && <p className="text-gray-500 text-center py-4">No appointments scheduled.</p>}

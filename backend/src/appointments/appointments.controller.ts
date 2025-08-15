@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
@@ -26,5 +26,10 @@ export class AppointmentsController {
     @Patch(':id/cancel')
     cancel(@Param('id') id: string) {
         return this.appointmentsService.cancel(+id);
+    }
+
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.appointmentsService.remove(+id);
     }
 }

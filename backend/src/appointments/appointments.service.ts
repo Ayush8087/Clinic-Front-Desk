@@ -58,4 +58,13 @@ export class AppointmentsService {
         appointment.status = AppointmentStatus.CANCELED;
         return this.appointmentsRepository.save(appointment);
     }
+
+    async remove(id: number): Promise<void> {
+        const appointment = await this.appointmentsRepository.findOneBy({ id });
+        if (!appointment) {
+            throw new NotFoundException(`Appointment with ID "${id}" not found`);
+        }
+        
+        await this.appointmentsRepository.remove(appointment);
+    }
 }
